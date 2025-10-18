@@ -1,5 +1,6 @@
 import { LogEntry } from './types';
 import { deepDelete, sleep } from '../utils/general'; // You will probably want to use these
+import chalk from 'chalk'; // This is just for fun, don't worry about it
 
 
 export class LogTriageAgent {
@@ -12,7 +13,7 @@ export class LogTriageAgent {
   }
 
   async run(): Promise<string> {
-
-    return "Implement your agent loop here. Make sure to have a breaking condition so it doesn't go on forever and burn your tokens.";
+    return chalk.green(`Implement your agent loop here.
+Make sure to have a breaking condition so it doesn't go on forever and ${chalk.red("burn your tokens")}`); 
   }
 }
