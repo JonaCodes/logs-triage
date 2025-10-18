@@ -4,9 +4,11 @@ import { deepDelete, sleep } from '../utils/general'; // You will probably want 
 
 export class LogTriageAgent {
   private logsFileNumber: number;
+  private logs: LogEntry[];
 
   constructor(logsFileNumber: number, logs: LogEntry[]) {
     this.logsFileNumber = logsFileNumber;
+    this.logs = logs;
   }
 
   async run(): Promise<string> {
