@@ -2,55 +2,38 @@ import { z } from 'zod';
 import { tool } from 'ai';
 
 export const tools = {
-  filter_expenses: tool({
-    description: 'Returns a filtered subset of expenses based on date range, category, vendor, or amount criteria. You will usually use this FIRST to narrow down expenses before using other analysis tools.',
+  search_logs_by_identifier: tool({
+    description: `Search all logs using a specific identifier.
+    If you call this tool with identifier A, and it returns data that includes identifier B, call this tool again with identifier B to trace the root cause.
+    DO NOT call this tool with the same identifier type multiple times, instead try different identifier types to dig deep.`,
     inputSchema: z.object({
-      startDate: z.string().optional().describe('Start date in YYYY-MM-DD format'),
-      endDate: z.string().optional().describe('End date in YYYY-MM-DD format'),
-      category: z.string().optional().describe('Category to filter by (e.g., "groceries", "dining")'),
-      vendor: z.string().optional().describe('Vendor/merchant name to filter by'),
-      minAmount: z.number().optional().describe('Minimum expense amount in NIS'),
-      maxAmount: z.number().optional().describe('Maximum expense amount in NIS'),
+      identifier_type: z.enum(['batch_id', 'user_id', 'source_id', 'request_id']).describe('Any identifier found in the logs, e.g user_id, request_id, etc, or error_type for errors'),
+      identifier_value: z.string().describe('The actual ID value to search for'),
     }),
   }),
 
-  aggregate_expenses: tool({
-    description: 'Groups expenses and calculates totals and counts for each group. Always use filter_expenses first if you need to limit the date range or category.',
+  get_recent_changes: tool({
+    description: 'Pull recent system changes (deployments, config changes, migrations) to correlate with errors.',
+    inputSchema: z.object(),
+  }),
+
+  create_ticket: tool({
+    description: 'Create a tracking ticket for non-urgent issues (warnings, minor bugs, tech debt).',
     inputSchema: z.object({
-      groupBy: z.enum(['category', 'vendor', 'month', 'year']).describe('How to group the expenses: by category (e.g., "groceries"), vendor (e.g., "Whole Foods"), month (e.g., "2024-10"), or year (e.g., "2024")'),
+      title: z.string().describe('Brief, descriptive title'),
+      description: z.string().describe('1 sentence description with findings'),
     }),
   }),
 
-  calculate_statistics: tool({
-    description: 'Calculates a single statistical metric (mean, median, total, count, min, or max) on a set of expenses. Use filter_expenses first if you need to analyze a specific category or date range.',
+  alert_team: tool({
+    description: 'Alert the team for clear issues (system outages, widespread errors, data loss). Do not send alert before completing your investigation.',
     inputSchema: z.object({
-      metric: z.enum(['mean', 'median', 'total', 'count', 'min', 'max']).describe('Which statistic to calculate: mean (average), median (middle value), total (sum), count (number of expenses), min (smallest), max (largest)'),
-    }),
-  }),
-
-  detect_anomalies: tool({
-    description: 'Identifies unusual or outlier expenses using statistical analysis (standard deviation method). Use filter_expenses first if you want to detect anomalies within a specific category or time period.',
-    inputSchema: z.object({
-      thresholdMultiplier: z.number().optional().describe('How many standard deviations from the mean to consider anomalous. Default is 2 (expenses more than 2 std devs above mean). Higher = fewer anomalies detected.'),
-    }),
-  }),
-
-  compare_datasets: tool({
-    description: 'Compares spending between two time periods and calculates differences and percentage changes. This tool handles the date filtering internally - just provide the two date ranges to compare.',
-    inputSchema: z.object({
-      period1Start: z.string().describe('Start date of first period in YYYY-MM-DD format'),
-      period1End: z.string().describe('End date of first period in YYYY-MM-DD format'),
-      period2Start: z.string().describe('Start date of second period in YYYY-MM-DD format'),
-      period2End: z.string().describe('End date of second period in YYYY-MM-DD format'),
-      compareBy: z.enum(['total', 'category', 'average']).describe('What to compare: "total" (overall spending), "category" (breakdown by category), or "average" (average transaction size)'),
-    }),
-  }),
-
-  generate_summary: tool({
-    description: 'Generates a natural language summary by calling an LLM with processed expense data. Use this LAST after gathering data with other tools to create human-readable insights.',
-    inputSchema: z.object({
-      data: z.record(z.string(), z.unknown()).describe('The processed expense data to summarize (output from other tools)'),
-      prompt: z.string().describe('Instructions for what kind of summary to generate. Be specific about what insights you want highlighted based on the user\'s original question.'),
+      teams: z.string().describe('The teams to alert, separated by commas if more than one. Each service (payment-service, auth service, etc) has its own team.'),
+      message: z.string().describe(`A message in the following format:
+        ALERT!
+        What happened: <3-4 words>
+        Proof: <relevant context in 1-2 lines>
+        Next step: <1 sentence recommendation>`),
     }),
   }),
 };

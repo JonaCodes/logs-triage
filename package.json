@@ -4,13 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch server.ts",
+    "dev": "tsx services/logTriageService.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/services/logTriageService.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.23",
     "ai": "^5.0.72",
+    "chalk": "^5.6.2",
     "dotenv": "^17.2.3",
     "path": "^0.12.7",
     "zod": "^4.1.12"

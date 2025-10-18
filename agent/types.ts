@@ -1,12 +1,13 @@
-export interface Expense {
-  date: string;
-  amount: number;
-  category: string | null;
-  vendor: string;
+export interface LogEntry {
+  time: string;
+  service: string;
+  level: 'ERROR' | 'WARN' | 'INFO';
+  msg: string;
 }
 
-export interface ToolResult {
-  toolCallId: string;
-  toolName: string;
-  result: unknown;
+export interface RecentChanges {
+  timestamp: string;
+  type: string;
+  description: string;
+  filesAffected: string[];
 }
